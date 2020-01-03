@@ -30,7 +30,7 @@ def _populate():
         if f'podcraft_manage.{proto}' in eps:
             path_callabes[proto] = {
                 e.name: e.load()
-                for e in eps['podcraft_manage.lifespan']
+                for e in eps[f'podcraft_manage.{proto}']
             }
 
 
