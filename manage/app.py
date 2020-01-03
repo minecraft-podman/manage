@@ -37,9 +37,6 @@ def _populate():
 _populate()
 del _populate
 
-print(lifespan_callables)
-print(path_callabes)
-
 
 async def entrypoint(scope, receive, send):
     if scope['type'] == 'lifespan':
@@ -81,12 +78,12 @@ async def manage_lifespan(funcs, scope, receive, send):
                 if r['type'].endswith('.failed')
             ]
             if errors:
-                send({
+                await send({
                     'type': msg['type']+'.failed',
                     'message': '\n'.join(e['message'] for e in errors)
                 })
             else:
-                send({
+                await send({
                     'type': msg['type']+'.complete',
                 })
             if msg['type'] == 'lifespan.shutdown':
@@ -107,7 +104,7 @@ class LifespanWrapper:
         self._o2i_queue = asyncio.Queue(1)  # Outter to inner
         self._i2o_queue = asyncio.Queue(1)  # Inner to outter
         self._task = asyncio.ensure_future(
-            func, scope, self._o2i_queue.get, self._i2o_queue.put,
+            func(scope, self._o2i_queue.get, self._i2o_queue.put)
         )
         self._task_finished = asyncio.Event()
 
@@ -115,7 +112,8 @@ class LifespanWrapper:
         """
         Blocks until the inner task finishes
         """
-        await self._task
+        if not self._task.done():
+            await self._task
         return ...
 
     def cancel(self):
@@ -143,14 +141,24 @@ async def _race(*aws, timeout=None):
     """
     Waits for several awaitables in parallel, returning the results of the first
     to complete and cancelling the others.
+
+    If several tasks are already completed, one will be returned.
+
+    If several tasks complete at once, only one is returned.
     """
+    aws = list(map(asyncio.ensure_future, aws))
+
     done, pending = await asyncio.wait(
-        map(asyncio.ensure_future, aws),
+        aws,
         return_when=asyncio.FIRST_COMPLETED,
         timeout=timeout,
     )
-    assert len(done) == 1
+
     for p in pending:
         p.cancel()
-    done = next(iter(done))
-    return done.result()
+
+    # This is so that if multiple tasks finished at once, they're returned in
+    # argument order
+    for t in aws:
+        if t in done:
+            return t.result()
