@@ -4,11 +4,17 @@ The ASGI entrypoint
 import asyncio
 import importlib.metadata
 
+from .fallback import http_404, websocket_404
+
 
 lifespan_callables = []
 path_callabes = {
     'http': {},
-    'websocket': {}
+    'websocket': {},
+}
+path_404 = {
+    'http': http_404,
+    'websocket': websocket_404,
 }
 
 
@@ -44,12 +50,12 @@ async def entrypoint(scope, receive, send):
         for prefix in sorted(path_callabes[scope['type']].keys(), key=len, reverse=True):
             if scope['path'].startswith(prefix+'/') or scope['path'] == prefix:
                 scope = scope.copy()
-                scope['root_path'] = prefix  # Set the "mount point"
+                scope['root_path'] = prefix.encode('utf-8')  # Set the "mount point"
                 func = path_callabes[scope['type']][prefix]
                 return await func(scope, receive, send)
         else:
             # TODO: Default 404 application
-            ...
+            return await path_404[scope['type']](scope, receive, send)
     else:
         raise NotImplementedError(f"Unknown protocol {scope['type']}")
 
