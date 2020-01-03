@@ -22,10 +22,10 @@ def _populate():
     global lifespan_callables, path_callabes
     eps = importlib.metadata.entry_points()
     if 'podcraft_manage.lifespan' in eps:
-        lifespan_callables = [
+        lifespan_callables = {
             e.load()
             for e in eps['podcraft_manage.lifespan']
-        ]
+        }
     for proto in ('http', 'websocket'):
         if f'podcraft_manage.{proto}' in eps:
             path_callabes[proto] = {
