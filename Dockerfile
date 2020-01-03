@@ -10,6 +10,6 @@ COPY --from=build /tmp/dist /tmp
 RUN pip install -r /tmp/requirements.txt
 RUN pip install /tmp/manage-*.whl
 
-# VOLUME ...
+VOLUME ["/mc/world", "/mc/snapshot", "/mc/server.properties"]
 CMD ["hypercorn", "-b", "0.0.0.0:80", "manage.app:entrypoint"]
 EXPOSE 80
