@@ -51,7 +51,7 @@ async def entrypoint(scope, receive, send):
                 func = path_callabes[scope['type']][prefix]
                 return await func(scope, receive, send)
         else:
-            # TODO: Default 404 application
+            # Return a 404
             return await path_404[scope['type']](scope, receive, send)
     else:
         raise NotImplementedError(f"Unknown protocol {scope['type']}")
@@ -113,6 +113,7 @@ class LifespanWrapper:
         Blocks until the inner task finishes
         """
         if not self._task.done():
+            # For some reason, this just blocks forever if the task is already finished
             await self._task
         return ...
 

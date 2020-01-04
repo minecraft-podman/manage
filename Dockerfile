@@ -9,6 +9,9 @@ FROM python:3-slim
 COPY --from=build /tmp/dist /tmp
 RUN pip install -r /tmp/requirements.txt
 RUN pip install /tmp/manage-*.whl
+ARG extra_pkgs
+# Is there a better way to do this without leaving extra files?
+RUN ["python", "-c", "import os, json\npkgs = json.loads(os.environ.get('extra_pkgs') or '[]')\nif pkgs: os.execv('/usr/local/bin/pip', ['pip', 'install', *pkgs])"]
 
 VOLUME ["/mc/world", "/mc/snapshot", "/mc/server.properties"]
 CMD ["hypercorn", "-b", "0.0.0.0:80", "manage.app:entrypoint"]
