@@ -15,5 +15,10 @@ ARG extra_pkgs
 RUN ["python", "-c", "import os, json\npkgs = json.loads(os.environ.get('extra_pkgs') or '[]')\nif pkgs: os.execv('/usr/local/bin/pip', ['pip', 'install', *pkgs])"]
 
 VOLUME ["/mc/world", "/mc/snapshot", "/mc/server.properties"]
-CMD ["hypercorn", "-b", "0.0.0.0:80", "manage.app:entrypoint"]
+CMD ["hypercorn", \
+     "--bind", "0.0.0.0:80", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-", \
+     "--log-level", "debug", \
+     "manage.app:entrypoint"]
 EXPOSE 80
