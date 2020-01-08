@@ -9,7 +9,7 @@ from ..mc import server_properties
 async def query_server(request):
     props = await server_properties()
     port = int(props.get('server-port', 25565))
-    data = await minecraft_ping('localhost', port)
+    data, _ = await minecraft_ping('localhost', port)
     return JSONResponse(data)
 
 
