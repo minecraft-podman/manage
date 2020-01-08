@@ -1,13 +1,16 @@
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse, PlainTextResponse
+from starlette.responses import JSONResponse
 from starlette.routing import Route
+from aiomc import minecraft_ping
+
+from ..mc import server_properties
 
 
 async def query_server(request):
-    # with open('/etc/hosts') as f:
-    #     data = f.read()
-    # return PlainTextResponse(data)
-    return JSONResponse({'TODO': 'return server-list-ping data'})
+    props = await server_properties()
+    port = int(props.get('server-port', 25565))
+    data = await minecraft_ping('localhost', port)
+    return JSONResponse(data)
 
 
 app = Starlette(debug=True, routes=[
