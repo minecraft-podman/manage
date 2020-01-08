@@ -3,11 +3,12 @@ RUN pip install poetry
 COPY . /tmp
 WORKDIR /tmp
 RUN poetry build
-RUN poetry export --format requirements.txt -o dist/requirements.txt
+# This doesn't work with dependencies from git
+# RUN poetry export --format requirements.txt -o dist/requirements.txt
 
-FROM python:3-slim
+FROM python:3
 COPY --from=build /tmp/dist /tmp
-RUN pip install -r /tmp/requirements.txt
+# RUN pip install -r /tmp/requirements.txt
 RUN pip install /tmp/manage-*.whl
 ARG extra_pkgs
 # Is there a better way to do this without leaving extra files?
