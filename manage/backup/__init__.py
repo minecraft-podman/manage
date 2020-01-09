@@ -16,6 +16,10 @@ log = logging.getLogger(__name__)
 scheduler = Scheduler()
 
 
+DELAY = 5*60  # Seconds
+FREQUENCY = 60 * 60
+
+
 @sync_to_async
 def copy_dirs(src, dst):
     for name in os.listdir(src):
@@ -25,7 +29,7 @@ def copy_dirs(src, dst):
 
 async def backup():
     log.info("Starting snapshot")
-    with rcon() as command:
+    async with rcon() as command:
         await command("save-off")
         try:
             # save-off might interfere with this? Docs are contradictory
@@ -38,10 +42,14 @@ async def backup():
 
 
 def schedule():
-    scheduler.add_job(
-        CronJob(name='snapshot', tolerance=3600).every().hour.go(backup)
+    loop = asyncio.get_event_loop()
+    loop.call_later(
+        DELAY, scheduler.add_job,
+        CronJob(name='snapshot', tolerance=3600)
+        .every(FREQUENCY).second
+        .go(backup),
     )
-    asyncio.create_task(schedule.start())
+    asyncio.create_task(scheduler.start())
 
 
 app = Starlette(debug=True, routes=[

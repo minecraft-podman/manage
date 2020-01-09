@@ -26,7 +26,7 @@ def server_properties(path="/mc/server.properties"):
 
 @contextlib.asynccontextmanager
 async def rcon():
-    props = server_properties()
+    props = await server_properties()
     port = int(props['rcon.port'])
     auth = props['rcon.password']
 
