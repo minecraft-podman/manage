@@ -36,7 +36,7 @@ async def rcon():
         await proto.login(auth)
         async def command(cmd):
             buf = ""
-            async for out in proto.command('save-all'):
+            async for out in proto.command(cmd):
                 buf += out
             return buf
 
