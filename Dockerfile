@@ -6,7 +6,7 @@ RUN poetry build
 # This doesn't work with dependencies from git
 # RUN poetry export --format requirements.txt -o dist/requirements.txt
 
-FROM python:3
+FROM python:3-slim
 COPY --from=build /tmp/dist /tmp
 # RUN pip install -r /tmp/requirements.txt
 RUN pip install /tmp/manage-*.whl

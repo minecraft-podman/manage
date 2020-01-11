@@ -8,7 +8,7 @@ version = "0.4.0"
 
 [[package]]
 category = "main"
-description = "Ping Minecraft servers"
+description = ""
 name = "aiomc"
 optional = false
 python-versions = "*"
@@ -18,10 +18,9 @@ version = "0.0.1"
 dnspython = ">=1.15.0"
 
 [package.source]
-reference = "587a0e9821f4ccbbdb185be16291ea03dbc76aa3"
-type = "git"
-url = "https://github.com/minecraft-podman/aiomc.git"
-
+reference = ""
+type = "url"
+url = "https://github.com/minecraft-podman/aiomc/archive/master.zip"
 [[package]]
 category = "main"
 description = "Better dates & times for Python"
@@ -287,7 +286,7 @@ version = "0.15.0"
 h11 = ">=0.8.1"
 
 [metadata]
-content-hash = "c742bec652b5991413084ec05830647e17aa3df304afd676ee87450245e0b6a1"
+content-hash = "0bcb8a849db10009610dbee887a6f8514f31945510dac24a5c89f7c2c9efbe8e"
 python-versions = "^3.8"
 
 [metadata.files]
