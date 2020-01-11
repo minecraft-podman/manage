@@ -3,6 +3,7 @@ The ASGI entrypoint
 """
 import asyncio
 import importlib.metadata
+import logging
 
 from .fallback import http_404, websocket_404
 
@@ -39,6 +40,7 @@ del _populate
 
 
 async def entrypoint(scope, receive, send):
+    _fix_logging()
     if scope['type'] == 'lifespan':
         # All the functionality of this is too complex to inline
         await manage_lifespan(lifespan_callables, scope, receive, send)
@@ -163,3 +165,8 @@ async def _race(*aws, timeout=None):
     for t in aws:
         if t in done:
             return t.result()
+
+
+def _fix_logging():
+    root = logging.getLogger()
+    root.setLevel(0)

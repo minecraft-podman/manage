@@ -4,6 +4,9 @@ import dataclasses
 import struct
 import asyncio
 import weakref
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class InvalidPacket(Exception):
@@ -207,12 +210,12 @@ class RconProtocol(asyncio.BufferedProtocol):
 
     # User-facing stuff
     def _received_packet(self, packet):
+        log.debug("recv:", packet)
         if packet.request_id in self._response_queues:
             # This shouldn't raise an exception because our queues should be unbounded
             self._response_queues[packet.request_id].put_nowait(packet)
         else:
-            # TODO: Warn
-            print(f"Dropped packet: {packet!r}")
+            log.warning(f"Dropped packet: {packet!r}")
 
     def _real_write(self, data):
         self._transport.write(data)
@@ -223,6 +226,7 @@ class RconProtocol(asyncio.BufferedProtocol):
 
         Raises BrokenPipeError if unable to send due to closed connection.
         """
+        log.debug("send:", packet)
         await self._write_proxy(packet.to_bytes())
 
     def _open_channel(self):
