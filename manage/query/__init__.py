@@ -7,7 +7,10 @@ from ..mc import server_properties
 
 
 async def query_server(request):
-    props = await server_properties()
+    try:
+        props = await server_properties()
+    except FileNotFoundError:
+        return JSONResponse("No server.properties", status_code=500)
     port = int(props.get('server-port', 25565))
     data, _ = await minecraft_ping('localhost', port)
     return JSONResponse(data)
