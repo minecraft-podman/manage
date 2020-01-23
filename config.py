@@ -1,3 +1,5 @@
+import logging
+
 bind = ['0.0.0.0:80']
 
 logconfig_dict = {
@@ -36,3 +38,6 @@ logconfig_dict = {
         }
     },
 }
+
+accesslog = logging.getLogger('hypercorn.access')
+errorlog = logging.getLogger('hypercorn.error')
