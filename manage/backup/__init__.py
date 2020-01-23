@@ -12,6 +12,7 @@ from starlette.routing import Route
 from ..mc import rcon
 
 log = logging.getLogger(__name__)
+rootlog = logging.getLogger(None)
 scheduler = Scheduler()
 
 
@@ -22,6 +23,13 @@ FREQUENCY = 60 * 60
 @sync_to_async
 def copy_dirs(src, dst):
     shutil.copytree(src, dst, dirs_exist_ok=True)
+
+
+async def capture_exceptions(func):
+    try:
+        await func()
+    except Exception:
+        rootlog.exception("Exception in background task")
 
 
 async def backup():
@@ -45,7 +53,7 @@ def schedule():
         DELAY, scheduler.add_job,
         CronJob(name='snapshot', tolerance=3600)
         .every(FREQUENCY).second
-        .go(backup),
+        .go(capture_exceptions, backup),
     )
 
     asyncio.create_task(scheduler.start())
