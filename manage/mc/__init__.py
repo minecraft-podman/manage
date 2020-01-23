@@ -9,7 +9,7 @@ from .rcon import RconProtocol
 
 
 @functools.lru_cache
-def server_properties(path="/mc/server.properties"):
+def server_properties(path="/mc/server.properties", *, http=False):
     async def _inner():
         props = {}
         try:
@@ -23,7 +23,10 @@ def server_properties(path="/mc/server.properties"):
                         k, v = line.split('=', 1)
                         props[k.strip()] = v.strip()
         except FileNotFoundError:
-            raise HTTPException(500, detail="server.properties not found")
+            if http:
+                raise HTTPException(500, detail="server.properties not found")
+            else:
+                raise
         return props
     return asyncio.ensure_future(_inner())
 
