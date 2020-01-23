@@ -3,6 +3,7 @@ import functools
 import contextlib
 
 import aiofiles
+from starlette.exceptions import HTTPException
 
 from .rcon import RconProtocol
 
@@ -11,15 +12,18 @@ from .rcon import RconProtocol
 def server_properties(path="/mc/server.properties"):
     async def _inner():
         props = {}
-        async with aiofiles.open(path) as f:
-            async for line in f:
-                if line.startswith('#'):
-                    continue
-                elif '=' not in line:
-                    continue
-                else:
-                    k, v = line.split('=', 1)
-                    props[k.strip()] = v.strip()
+        try:
+            async with aiofiles.open(path) as f:
+                async for line in f:
+                    if line.startswith('#'):
+                        continue
+                    elif '=' not in line:
+                        continue
+                    else:
+                        k, v = line.split('=', 1)
+                        props[k.strip()] = v.strip()
+        except FileNotFoundError:
+            raise HTTPException(500, detail="server.properties not found")
         return props
     return asyncio.ensure_future(_inner())
 
