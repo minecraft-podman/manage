@@ -8,6 +8,7 @@ RUN poetry build
 
 FROM python:3-slim
 COPY --from=build /tmp/dist /tmp
+COPY config.py /etc/hypercorn.py
 # RUN pip install -r /tmp/requirements.txt
 RUN pip install /tmp/manage-*.whl
 ARG extra_pkgs
@@ -15,10 +16,5 @@ ARG extra_pkgs
 RUN ["python", "-c", "import os, json\npkgs = json.loads(os.environ.get('extra_pkgs') or '[]')\nif pkgs: os.execv('/usr/local/bin/pip', ['pip', 'install', *pkgs])"]
 
 VOLUME ["/mc/world", "/mc/snapshot", "/mc/server.properties"]
-CMD ["hypercorn", \
-     "--bind", "0.0.0.0:80", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-", \
-     "--log-level", "debug", \
-     "manage.app:entrypoint"]
+CMD ["hypercorn", "--config", "python:/etc/hypercorn.py", "manage.app:entrypoint"]
 EXPOSE 80
